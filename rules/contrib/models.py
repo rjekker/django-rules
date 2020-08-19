@@ -10,7 +10,6 @@ from rules.compat.six import string_types, wraps
 from .views import _redirect_to_login
 from ..permissions import add_perm
 
-
 class RulesModelBaseMixin:
     """
     Mixin for the metaclass of Django's Model that allows declaring object-level
@@ -207,14 +206,14 @@ class RulesModelMixin:
         def decorator(view_func):
             @wraps(view_func)
             def _wrapped_view(request, *args, **kwargs):
-                if not kwargs:
-                    get_object_kwargs = {"pk": "id"}
-                else:
-                    try:
+                try:
+                    if not decorator_kwargs:
+                        get_object_kwargs = {"pk": kwargs["id"]}
+                    else:
                         get_object_kwargs = {name: kwargs[value] for name, value in decorator_kwargs.items()}
-                    except KeyError as error:
-                        raise ImproperlyConfigured('Argument {0} is not available. Given arguments: [{1}]'
-                .format(str(error), ', '.join(decorator_kwargs.values())))
+                except KeyError as error:
+                    raise ImproperlyConfigured('Argument {0} is not available. View arguments: [{1}]'
+                .format(str(error), ', '.join(kwargs.values())))
 
                 # Get the object to check permissions against
                 obj = get_object_or_404(cls, **get_object_kwargs)
