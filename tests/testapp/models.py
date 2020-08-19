@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import sys
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 
 try:
@@ -34,3 +35,16 @@ if sys.version_info.major >= 3:
         @classmethod
         def preprocess_rules_permissions(cls, perms):
             perms["custom"] = rules.always_true
+
+
+    @rules.predicate
+    def is_car_owner(user, car):
+        return car.owner == user
+
+    class Car(RulesModel):
+        owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+
+        class Meta:
+            rules_permissions = {"wash": rules.always_allow,
+                                 "drive": is_car_owner,
+                                 "crash": rules.always_deny}
