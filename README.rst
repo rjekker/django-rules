@@ -6,14 +6,18 @@ Django, without requiring a database. At its core, it is a generic framework
 for building rule-based systems, similar to `decision trees`_. It can also be
 used as a standalone library in other contexts and frameworks.
 
-.. image:: https://travis-ci.org/dfunckt/django-rules.svg?branch=master
-    :target: https://travis-ci.org/dfunckt/django-rules
+.. image:: https://img.shields.io/github/workflow/status/dfunckt/django-rules/CI/master
+    :target: https://github.com/dfunckt/django-rules/actions
 .. image:: https://coveralls.io/repos/dfunckt/django-rules/badge.svg
     :target: https://coveralls.io/r/dfunckt/django-rules
 .. image:: https://img.shields.io/pypi/v/rules.svg
-    :target: https://pypi.python.org/pypi/rules
+    :target: https://pypi.org/project/rules/
 .. image:: https://img.shields.io/pypi/pyversions/rules.svg
-    :target: https://pypi.python.org/pypi/rules
+    :target: https://pypi.org/project/rules/
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    :target: https://github.com/pre-commit/pre-commit
 
 .. _decision trees: http://wikipedia.org/wiki/Decision_tree
 
@@ -43,6 +47,7 @@ Table of Contents
 =================
 
 - `Requirements`_
+- `Upgrading from 2.x`_
 - `Upgrading from 1.x`_
 - `How to install`_
 
@@ -79,8 +84,9 @@ Table of Contents
 Requirements
 ============
 
-``rules`` requires Python 2.7/3.4 or newer. It can optionally integrate with
-Django, in which case requires Django 1.11 or newer.
+``rules`` requires Python 3.7 or newer. The last version to support Python 2.7
+is ``rules`` 2.2. It can optionally integrate with Django, in which case
+requires Django 2.2 or newer.
 
 *Note*: At any given moment in time, ``rules`` will maintain support for all
 currently supported Django versions, while dropping support for those versions
@@ -88,6 +94,14 @@ that reached end-of-life in minor releases. See the `Supported Versions`_
 section on Django Project website for the current state and timeline.
 
 .. _Supported Versions: https://www.djangoproject.com/download/#supported-versions
+
+
+Upgrading from 2.x
+==================
+
+The are no significant changes between ``rules`` 2.x and 3.x except dropping
+support for Python 2, so before upgrading to 3.x you just need to make sure
+you're running a supported Python 3 version.
 
 
 Upgrading from 1.x
@@ -224,7 +238,7 @@ together into a *rule set*. ``rules`` has two predefined rule sets:
 
 So, let's define our first couple of rules, adding them to the shared rule
 set. We can use the ``is_book_author`` predicate we defined earlier:
-    
+
 .. code:: python
 
     >>> rules.add_rule('can_edit_book', is_book_author)
@@ -400,6 +414,7 @@ Now, checking again gives ``adrian`` the required permissions:
     >>> martin.has_perm('books.delete_book', guidetodjango)
     False
 
+**NOTE:** Calling `has_perm` on a superuser will ALWAYS return `True`.
 
 Permissions in models
 ---------------------
@@ -504,7 +519,7 @@ The example below is equivalent to the one above:
 
     @permission_required('posts.change_post', fn=objectgetter(Post, 'post_id'))
     def post_update(request, post_id):
-        # ...    
+        # ...
 
 For more information on the decorator and helper function, refer to the
 ``rules.contrib.views`` module.
@@ -582,12 +597,12 @@ Add ``rules`` to your ``INSTALLED_APPS``:
 Then, in your template::
 
     {% load rules %}
-    
+
     {% has_perm 'books.change_book' author book as can_edit_book %}
     {% if can_edit_book %}
         ...
     {% endif %}
-    
+
     {% test_rule 'has_super_feature' user as has_super_feature %}
     {% if has_super_feature %}
         ...
@@ -607,10 +622,10 @@ Admin. The Admin asks for *four* different permissions, depending on action:
 - ``<app_label>.delete_<modelname>``
 - ``<app_label>``
 
-*Note:* view permission is new in Django v2.1 and should not be added in versions before that. 
+*Note:* view permission is new in Django v2.1 and should not be added in versions before that.
 
 The first four are obvious. The fifth is the required permission for an app
-to be displayed in the Admin's "dashboard". Overriding it does not restrict access to the add, 
+to be displayed in the Admin's "dashboard". Overriding it does not restrict access to the add,
 change or delete views. Here's some rules for our imaginary ``books`` app as an example:
 
 .. code:: python
@@ -644,10 +659,10 @@ thus enabling permissions per object in the Admin:
     from django.contrib import admin
     from rules.contrib.admin import ObjectPermissionsModelAdmin
     from .models import Book
-    
+
     class BookAdmin(ObjectPermissionsModelAdmin):
         pass
-    
+
     admin.site.register(Book, BookAdmin)
 
 Now this allows you to specify permissions like this:
@@ -815,7 +830,7 @@ Logging predicate evaluation
 evaluated to help with debugging your predicates. Messages are sent at the
 DEBUG level to the ``'rules'`` logger. The following `dictConfig`_ configures
 a console logger (place this in your project's `settings.py` if you're using
-`rules` with Django): 
+`rules` with Django):
 
 .. code:: python
 
@@ -968,9 +983,9 @@ Decorators
 
 ``@predicate``
     Decorator that creates a predicate out of any callable:
-    
+
     .. code:: python
-    
+
         >>> @predicate
         ... def is_book_author(user, book):
         ...     return book.author == user
@@ -979,9 +994,9 @@ Decorators
         <Predicate:is_book_author object at 0x10eeaa490>
 
     Customising the predicate name:
-    
+
     .. code:: python
-    
+
         >>> @predicate(name='another_name')
         ... def is_book_author(user, book):
         ...     return book.author == user
@@ -990,9 +1005,9 @@ Decorators
         <Predicate:another_name object at 0x10eeaa490>
 
     Binding ``self``:
-    
+
     .. code:: python
-    
+
         >>> @predicate(bind=True)
         ... def is_book_author(self, user, book):
         ...     if 'user_has_special_flag' in self.context:

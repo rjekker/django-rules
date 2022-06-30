@@ -6,7 +6,6 @@ from django.db.models import Model
 from django.db.models.base import ModelBase
 from django.shortcuts import get_object_or_404
 
-from rules.compat.six import string_types, wraps
 from .views import _redirect_to_login
 from ..permissions import add_perm
 
@@ -116,7 +115,7 @@ class RulesModelMixin:
             @wraps(view_func)
             def _wrapped_view(request, *args, **kwargs):
                 # Normalize to a list of permissions
-                if isinstance(perm, string_types):
+                if isinstance(perm, str):
                     perms = cls.get_perm(perm)
                 else:
                     perms = ( cls.get_perm(p) for p in perm )
@@ -222,7 +221,7 @@ class RulesModelMixin:
                 user = request.user
 
                 # Normalize to a list of permissions
-                if isinstance(perm, string_types):
+                if isinstance(perm, str):
                     perms = cls.get_perm(perm)
                 else:
                     perms = ( cls.get_perm(p) for p in perm )
