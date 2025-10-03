@@ -48,9 +48,7 @@ setup(
         "rules.templatetags",
         "rules.contrib",
     ],
-    install_requires=[
-        "Django>=3.2"
-    ],
+    install_requires=["Django>=3.2"],
     include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
