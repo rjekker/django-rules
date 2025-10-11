@@ -5,6 +5,8 @@ Changelog
 
 *Add a sentence for each interesting change in this section.*
 
+- Add support for Django 5.2
+
 -------
 
 ## v3.5.0 - 2024/09/02
