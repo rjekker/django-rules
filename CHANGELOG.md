@@ -1,6 +1,27 @@
 Changelog
 =========
 
+## Unreleased
+
+*Add a sentence for each interesting change in this section.*
+
+- Add support for Django 5.2
+
+-------
+
+## v3.5.0 - 2024/09/02
+
+- Add support for Django 5.1
+
+## v3.4.0 - 2024/05/18
+
+- Add support for Django 4.2 and 5.0
+- Add support for Python 3.11 and 3.12
+- Drop support for EOL Python 3.7
+- Drop support for EOL Django 2.2 and 4.0
+- Fix bug: type annotations were not used because ``py.typed`` was not always
+  installed.
+
 ## v3.3.0 - 2022/03/23
 
 - Introduce type annotations for common APIs

@@ -56,6 +56,7 @@ Table of Contents
 - `Using Rules`_
 
   - `Creating predicates`_
+  - `Dynamic predicates`_
   - `Setting up rules`_
   - `Combining predicates`_
 
@@ -84,9 +85,9 @@ Table of Contents
 Requirements
 ============
 
-``rules`` requires Python 3.7 or newer. The last version to support Python 2.7
+``rules`` requires Python 3.8 or newer. The last version to support Python 2.7
 is ``rules`` 2.2. It can optionally integrate with Django, in which case
-requires Django 2.2 or newer.
+requires Django 3.2 or newer.
 
 *Note*: At any given moment in time, ``rules`` will maintain support for all
 currently supported Django versions, while dropping support for those versions
@@ -218,6 +219,28 @@ always return ``True`` if the condition they check is true, ``False``
 otherwise. ``rules`` comes with several predefined predicates that you may
 read about later on in `API Reference`_, that are mostly useful when dealing
 with `authorization in Django`_.
+
+
+Dynamic predicates
+-------------------
+
+If needed predicates can be created dynamically depending on parameters:
+
+.. code:: python
+
+    import rules
+
+
+    def role_is(role_id):
+        @rules.predicate
+        def user_has_role(user):
+            return user.role.id == role_id
+
+        return user_has_role
+
+
+    rules.add_perm("reports.view_report_abc", role_is(12))
+    rules.add_perm("reports.view_report_xyz", role_is(13))
 
 
 Setting up rules
@@ -550,7 +573,7 @@ You can customise the object either by overriding ``get_object`` or
 For more information refer to the `Django documentation`_ and the
 ``rules.contrib.views`` module.
 
-.. _Django documentation: https://docs.djangoproject.com/en/1.9/topics/auth/default/#limiting-access-to-logged-in-users
+.. _Django documentation: https://docs.djangoproject.com/en/stable/topics/auth/default/#limiting-access-to-logged-in-users
 
 Checking permission automatically based on view type
 ++++++++++++++++++++++++++++++++++++++++++++++++++++
