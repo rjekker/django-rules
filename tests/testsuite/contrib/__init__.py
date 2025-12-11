@@ -22,7 +22,4 @@ class TestData:
             isbn=ISBN, title="The Definitive Guide to Django", author=adrian
         )
 
-
-        Car.objects.create(
-            owner=adrian
-        )
+        Car.objects.create(owner=adrian)

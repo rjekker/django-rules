@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
 from django.conf import settings
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 import rules
 from rules.contrib.models import RulesModel
@@ -35,7 +35,8 @@ class Car(RulesModel):
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
 
     class Meta:
-        rules_permissions = {"wash": rules.always_allow,
-                             "drive": is_car_owner,
-                             "crash": rules.always_deny }
-
+        rules_permissions = {
+            "wash": rules.always_allow,
+            "drive": is_car_owner,
+            "crash": rules.always_deny,
+        }
