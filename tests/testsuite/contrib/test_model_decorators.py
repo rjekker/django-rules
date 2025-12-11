@@ -46,7 +46,7 @@ class ModelDecoratorTests(TestData, TestCase):
         response = self.client.get(reverse("drive_car", args=(1,)))
         self.assertEqual(response.status_code, 302)
 
-        # Martin can *not* crash Adrian's book and an PermissionDenied is raised
+        # Martin can *not* crash Adrian's car and an PermissionDenied is raised
         self.assertTrue(self.client.login(username="martin", password="secr3t"))
         response = self.client.get(reverse("crash_car", args=(1,)))
         self.assertEqual(response.status_code, 403)
@@ -88,7 +88,7 @@ class ModelDecoratorTests(TestData, TestCase):
         response = self.client.get(reverse("drive_car_default", args=(1,)))
         self.assertEqual(response.status_code, 302)
 
-        # Martin can *not* crash Adrian's book and an PermissionDenied is raised
+        # Martin can *not* crash Adrian's car and an PermissionDenied is raised
         self.assertTrue(self.client.login(username="martin", password="secr3t"))
         response = self.client.get(reverse("crash_car_default", args=(1,)))
         self.assertEqual(response.status_code, 403)
