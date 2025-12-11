@@ -1,25 +1,12 @@
 from __future__ import absolute_import
 
-import sys
-import unittest
-
-from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
-from django.http import HttpRequest, Http404
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import force_str
-from django.views.generic import CreateView, View
-
-import rules
-from rules.contrib.views import AutoPermissionRequiredMixin, objectgetter
 
 from . import TestData
 
-if sys.version_info.major >= 3:
-    from testapp.models import Car
 
-@unittest.skipIf(sys.version_info.major < 3,  "Python 3 only")
 class ModelDecoratorTests(TestData, TestCase):
 
     def test_object_permission_required(self):
@@ -92,7 +79,6 @@ class ModelDecoratorTests(TestData, TestCase):
         self.assertTrue(self.client.login(username="martin", password="secr3t"))
         response = self.client.get(reverse("crash_car_default", args=(1,)))
         self.assertEqual(response.status_code, 403)
-
 
     def test_permission_required(self):
         # Test the decorators for class-level permissions
