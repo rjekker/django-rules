@@ -1,13 +1,14 @@
 from functools import wraps
 
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.core.exceptions import PermissionDenied, ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db.models import Model
 from django.db.models.base import ModelBase
 from django.shortcuts import get_object_or_404
 
-from .views import _redirect_to_login
 from ..permissions import add_perm
+from .views import _redirect_to_login
+
 
 class RulesModelBaseMixin:
     """
@@ -82,7 +83,13 @@ class RulesModelMixin:
         """
 
     @classmethod
-    def permission_required(cls, perm, login_url=None, raise_exception=False, redirect_field_name=REDIRECT_FIELD_NAME):
+    def permission_required(
+        cls,
+        perm,
+        login_url=None,
+        raise_exception=False,
+        redirect_field_name=REDIRECT_FIELD_NAME,
+    ):
         """
         View decorator that checks for the permission on a class.
 
@@ -94,8 +101,9 @@ class RulesModelMixin:
             def post_update(request, post_id):
                 # ...
 
-        This is an alternative to writing `@permission_required("myapp.change_post")`. If you want to check for
-        permissions on a specific object, `see object_permission_required`.
+        This is an alternative to writing `@permission_required("myapp.change_post")`.
+        If you want to check for permissions on a specific object, see
+        ``object_permission_required`.
 
         ``perm`` is either a permission name as a string, or a list of permission
         names.
@@ -118,7 +126,7 @@ class RulesModelMixin:
                 if isinstance(perm, str):
                     perms = cls.get_perm(perm)
                 else:
-                    perms = ( cls.get_perm(p) for p in perm )
+                    perms = (cls.get_perm(p) for p in perm)
 
                 # Get the user
                 user = request.user
@@ -129,7 +137,9 @@ class RulesModelMixin:
                     if raise_exception:
                         raise PermissionDenied()
                     else:
-                        return _redirect_to_login(request, view_func.__name__, login_url, redirect_field_name)
+                        return _redirect_to_login(
+                            request, view_func.__name__, login_url, redirect_field_name
+                        )
                 else:
                     # User has all required permissions -- allow the view to execute
                     return view_func(request, *args, **kwargs)
@@ -139,68 +149,79 @@ class RulesModelMixin:
         return decorator
 
     @classmethod
-    def object_permission_required(cls, perm, login_url=None, raise_exception=False, redirect_field_name=REDIRECT_FIELD_NAME, **decorator_kwargs):
+    def object_permission_required(
+        cls,
+        perm,
+        login_url=None,
+        raise_exception=False,
+        redirect_field_name=REDIRECT_FIELD_NAME,
+        **decorator_kwargs,
+    ):
         """
-        View decorator that checks for the permission on Model objects. It works best with views
-        that use get_object_or_404. It uses the parameters passed throught the url mapping to get an
-        object and test for permissions, or raises a 404 error if the object does not exist.
+            View decorator that checks for the permission on Model objects. It works
+            best with views that use get_object_or_404. It uses the parameters passed
+            through the url mapping to get an object and test for permissions, or
+            raises a 404 error if the object does not exist.
 
-        Use it like this:
+            Use it like this:
 
-            from posts.models import Post
+                from posts.models import Post
 
-            @Post.object_permission_required('change', pk="post_id")
-            def post_update(request, post_id):
-                # ...
-                post = get_object_or_404(pk=post_id)
-                # ....
+                @Post.object_permission_required('change', pk="post_id")
+                def post_update(request, post_id):
+                    # ...
+                    post = get_object_or_404(pk=post_id)
+                    # ....
 
-        ``perm`` is either a permission name as a string, or a list of permission
-        names
+            ``perm`` is either a permission name as a string, or a list of permission
+            names
 
-        After that, the optional arguments ``login_url``, ``raise_exception`` and ``redirect_field_names``
-        can be passed (see below). Any arguments after that are strings that specify the names of the arguments to pass
-        to get_object_or_404. So he argument `pk="post_id"` in the example above will look up the `post_id` argument
-        passed to the view function, and pass that as the `pk` argument to get_object_or_404. This means that there will
-        be two calls to get_object_or_404: one in the object_permission_required decorator, to check the permission,
-        and a second one inside the view function.
+            After that, the optional arguments ``login_url``, ``raise_exception`` and
+            ``redirect_field_names`` can be passed (see below). Any arguments after that
+            are strings that specify the names of the arguments to pass to
+            get_object_or_404. So he argument `pk="post_id"` in the example above will
+            look up the `post_id` argument passed to the view function, and pass that as
+            the `pk` argument to get_object_or_404. This means that there will be two
+            calls to get_object_or_404: one in the object_permission_required decorator,
+            to check the permission, and a second one inside the view function.
 
-        Another example:
+            Another example:
 
-            from books.models import Book
+                from books.models import Book
 
-            @Book.object_permission_required('read', title="name", author="author")
-            def read_book(request, name, author):
-                # ...
-                book = call get_object_or_404(title=name, author=author)
-                # ...
+                @Book.object_permission_required('read', title="name", author="author")
+                def read_book(request, name, author):
+                    # ...
+                    book = call get_object_or_404(title=name, author=author)
+                    # ...
 
-        Here, the `name` and `author` arguments will be taken from the url, and passed to get_object_or_404 as
-        `title` and `author`, respectively.
+            Here, the `name` and `author` arguments will be taken from the url, and
+            passed to get_object_or_404 as `title` and `author`, respectively.
 
-        If you do not specify any keyword arguments, this will assume you have an argument `id` that will be used as
-        a primary key. So the following will call get_object_or_404(pk=id):
+            If you do not specify any keyword arguments, this will assume you have an
+            argument `id` that will be used as a primary key. So the following will
+            call get_object_or_404(pk=id):
 
-            from todo.models import Todo
+                from todo.models import Todo
 
-            @Todo.object_permission_required('mark_done')
-            def mark_as_done(request, id):
-                # ...
-                get_object_or_404(pk=id)
-                # ...
+                @Todo.object_permission_required('mark_done')
+                def mark_as_done(request, id):
+                    # ...
+                    get_object_or_404(pk=id)
+                    # ...
 
-    Other optional arguments:
+        Other optional arguments:
 
-    ``raise_exception`` is a boolean specifying whether to raise a
-    ``django.core.exceptions.PermissionDenied`` exception if the check fails.
-    You will most likely want to set this argument to ``True`` if you have
-    specified a custom 403 response handler in your urlconf. If ``False``,
-    the user will be redirected to the URL specified by ``login_url``.
+        ``raise_exception`` is a boolean specifying whether to raise a
+        ``django.core.exceptions.PermissionDenied`` exception if the check fails.
+        You will most likely want to set this argument to ``True`` if you have
+        specified a custom 403 response handler in your urlconf. If ``False``,
+        the user will be redirected to the URL specified by ``login_url``.
 
-    ``login_url`` is an optional custom URL to redirect the user to if
-    permissions check fails. If omitted or empty, ``settings.LOGIN_URL`` is
-    used.
-    """
+        ``login_url`` is an optional custom URL to redirect the user to if
+        permissions check fails. If omitted or empty, ``settings.LOGIN_URL`` is
+        used.
+        """
 
         def decorator(view_func):
             @wraps(view_func)
@@ -209,10 +230,16 @@ class RulesModelMixin:
                     if not decorator_kwargs:
                         get_object_kwargs = {"pk": kwargs["id"]}
                     else:
-                        get_object_kwargs = {name: kwargs[value] for name, value in decorator_kwargs.items()}
+                        get_object_kwargs = {
+                            name: kwargs[value]
+                            for name, value in decorator_kwargs.items()
+                        }
                 except KeyError as error:
-                    raise ImproperlyConfigured('Argument {0} is not available. View arguments: [{1}]'
-                .format(str(error), ', '.join(kwargs.values())))
+                    raise ImproperlyConfigured(
+                        "No such argument {0}. View arguments: [{1}]".format(
+                            str(error), ", ".join(kwargs.values())
+                        )
+                    )
 
                 # Get the object to check permissions against
                 obj = get_object_or_404(cls, **get_object_kwargs)
@@ -224,7 +251,7 @@ class RulesModelMixin:
                 if isinstance(perm, str):
                     perms = cls.get_perm(perm)
                 else:
-                    perms = ( cls.get_perm(p) for p in perm )
+                    perms = (cls.get_perm(p) for p in perm)
 
                 # Check for permissions and return a response
                 if not user.has_perm(perms, obj):
@@ -232,7 +259,9 @@ class RulesModelMixin:
                     if raise_exception:
                         raise PermissionDenied()
                     else:
-                        return _redirect_to_login(request, view_func.__name__, login_url, redirect_field_name)
+                        return _redirect_to_login(
+                            request, view_func.__name__, login_url, redirect_field_name
+                        )
                 else:
                     # User has all required permissions -- allow the view to execute
                     return view_func(request, *args, **kwargs)
@@ -240,7 +269,6 @@ class RulesModelMixin:
             return _wrapped_view
 
         return decorator
-
 
 
 class RulesModel(RulesModelMixin, Model, metaclass=RulesModelBase):
